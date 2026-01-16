@@ -1,54 +1,53 @@
 import json
 import os
-from typing import Any, Dict
-from litellm import completion
+from typing import Any, Dict, List
+
 import litellm
-from dotenv import load_dotenv
+from pydantic import BaseModel, ValidationError, Field, ConfigDict
 
 
+class Itinerary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-# You can replace these with other models as needed but this is the one we suggest for this lab.
-MODEL = "groq/llama-3.3-70b-versatile"
-api_key = os.environ.get('GROQ_API_KEY')
-print("API KEY FOUND:", bool(os.getenv("GROQ_API_KEY")))
+    destination: str
+    price_range: str
+    ideal_visit_times: List[str]
+    top_attractions: List[str]
 
 
 def get_itinerary(destination: str) -> Dict[str, Any]:
-    """
-    Returns a JSON-like dict with keys:
-      - destination
-      - price_range
-      - ideal_visit_times
-      - top_attractions
-    """
-    api_key = os.environ.get('GROQ_API_KEY')
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing GROQ_API_KEY in environment")
+
     litellm.api_key = api_key
 
     prompt = f"""
-    Return ONLY valid JSON (no markdown) with exactly these keys:
-    - destination (string)
-    - price_range (string)
-    - ideal_visit_times (array of strings)
-    - top_attractions (array of strings)
+Return ONLY valid JSON (no markdown) with exactly these keys:
+- destination (string)
+- price_range (string)
+- ideal_visit_times (array of strings)
+- top_attractions (array of strings)
 
-    Destination: {destination}
-    """.strip()
+Destination: {destination}
+""".strip()
 
-    print("API KEY FOUND:", bool(os.getenv("GROQ_API_KEY")))
     response = litellm.completion(
         model="groq/llama-3.3-70b-versatile",
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
+        messages=[{"role": "user", "content": prompt}],
     )
 
     content = response["choices"][0]["message"]["content"]
-    print(json.loads(content))
 
-    # implement litellm call here to generate a structured travel itinerary for the given destination
+    try:
+        raw = json.loads(content)
+    except json.JSONDecodeError as e:
+        # Include model output to debug quickly
+        raise ValueError(f"Model did not return valid JSON: {e}\nRaw output:\n{content}") from e
 
-    # See https://docs.litellm.ai/docs/ for reference.
+    try:
+        itinerary = Itinerary.model_validate(raw)
+    except ValidationError as e:
+        raise ValueError(f"JSON schema validation failed:\n{e}\nRaw JSON:\n{raw}") from e
 
-    
-
-    return json.loads(content)
+    return itinerary.model_dump()
