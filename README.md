@@ -4,9 +4,9 @@ In homework I1 you will use third-party LLM APIs, and in the group project you w
 To receive credit for this lab, show your work to the TA during recitation.
 
 ## Deliverables
-- [ ] Use an API key to invoke an LLM API and generate a schema-enforced JSON travel itinerary.
-- [ ] Run the API endpoint with the LLM call implemented and demonstrate that it works using an example invocation.
-- [ ] Commit your code without committing your credentials. Explain to the TA why hard-coding credentials is a bad idea, and explain any remedial steps you might take should credentials accidentally be leaked. 
+- [X] Use an API key to invoke an LLM API and generate a schema-enforced JSON travel itinerary.
+- [X] Run the API endpoint with the LLM call implemented and demonstrate that it works using an example invocation.
+- [X] Commit your code without committing your credentials. Explain to the TA why hard-coding credentials is a bad idea, and explain any remedial steps you might take should credentials accidentally be leaked. 
 
 ## Getting started
 Clone the starter code from this Git repository
