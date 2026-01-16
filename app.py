@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 from analyze import get_itinerary
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def index():
@@ -9,6 +12,7 @@ def index():
 
 @app.get("/api/v1/itinerary")
 def itinerary():
+
     destination = request.args.get("destination", "").strip()
 
     # Basic request validation
